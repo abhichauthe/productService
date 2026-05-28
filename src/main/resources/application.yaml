@@ -2,13 +2,21 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: PRODUCT-SERVICE
+  config:
+    import: "optional:configserver:http://localhost:9296"  # ✅ added optional: prefix
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:3306/productdb
     username: root
     password: Root@123
-
     driver-class-name: com.mysql.cj.jdbc.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

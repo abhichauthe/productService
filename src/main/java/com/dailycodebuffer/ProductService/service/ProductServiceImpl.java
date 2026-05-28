@@ -1,6 +1,7 @@
 package com.dailycodebuffer.ProductService.service;
 
 import com.dailycodebuffer.ProductService.entity.Product;
+import com.dailycodebuffer.ProductService.exception.ProductServiceCustomException;
 import com.dailycodebuffer.ProductService.model.ProductRequest;
 import com.dailycodebuffer.ProductService.model.ProductResponse;
 import com.dailycodebuffer.ProductService.repository.ProductRepository;
@@ -21,7 +22,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ProductResponse getProductId(long productId) {
         log.info("Get the product for productid: {}",productId);
-        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product with given id not found"));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductServiceCustomException("Product with given id not found","PRODUCT_NOT_FOUND"));
 
         ProductResponse productResponse = new ProductResponse();
         copyProperties(product ,productResponse);
@@ -44,5 +45,20 @@ public class ProductServiceImpl implements ProductService{
 
         log.info("Product Created");
         return product.getProductId();
+    }
+
+    @Override
+    public void reduceQuantity(long productId, long quantity) {
+        log.info("Reduce Quantity {} for Id {}",quantity,productId);
+
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductServiceCustomException("Product with given Id not found", "PRODUCT_NOT_FOUND"));
+
+        if(product.getQuantity() < quantity){
+            throw new ProductServiceCustomException("product does not have sufficent quantity","INSUFFICENT_QUANTITY");
+        }
+
+        product.setQuantity(product.getQuantity() - quantity);
+        productRepository.save(product);
+        log.info("Product Quantity Updated Successfully");
     }
 }
